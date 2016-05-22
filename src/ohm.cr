@@ -413,7 +413,7 @@ module Ohm
       merge(atts)
     end
 
-    def initialize(@id : String)
+    private def initialize(@id : String)
       @attributes = Hash(String, String).new
     end
 
