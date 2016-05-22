@@ -1,0 +1,22 @@
+name: ohm
+version: 0.1.0
+
+authors:
+  - Michel Martens <mail@soveran.com>
+
+license: MIT
+
+dependencies:
+  resp:
+    github: soveran/resp-crystal
+    branch: master
+  nest:
+    github: soveran/nest-crystal
+    branch: master
+  stal:
+    github: soveran/stal-crystal
+    branch: master
+
+development_dependencies:
+  crotest:
+    github: emancu/crotest
