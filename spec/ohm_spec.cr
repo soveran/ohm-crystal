@@ -8,30 +8,30 @@ describe "Ohm" do
   end
 
   class Foo < Ohm::Model
-    attribute "a"
-    attribute "b"
-    attribute "c"
-    attribute "d"
+    attribute :a
+    attribute :b
+    attribute :c
+    attribute :d
 
-    index "a"
-    index "b"
+    index :a
+    index :b
 
-    unique "d"
+    unique :d
 
-    collection "bars", Bar, "foo_id"
+    collection :bars, Bar, :foo_id
   end
 
   class Bar < Ohm::Model
-    attribute "a"
+    attribute :a
 
-    counter "b"
+    counter :b
 
-    unique "a"
+    unique :a
 
-    reference "foo", Foo
+    reference :foo, Foo
 
-    set  "xs", Bar
-    list "ys", Bar
+    set  :xs, Bar
+    list :ys, Bar
   end
 
   it "should have a key" do
@@ -305,7 +305,7 @@ describe "Ohm" do
   end
 
   class Log < Ohm::Model
-    track "text"
+    track :text
 
     def append(msg)
       key["text"].call("APPEND", msg)
@@ -336,11 +336,11 @@ end
 
 describe "Finder" do
   class Baz < Ohm::Model
-    attribute "a"
-    attribute "b"
+    attribute :a
+    attribute :b
 
-    index "a"
-    index "b"
+    index :a
+    index :b
   end
 
   it "should be combinable" do

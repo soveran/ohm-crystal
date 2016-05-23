@@ -104,21 +104,21 @@ the example below:
 
 ```crystal
 class Event < Ohm::Model
-  attribute "name"
-  reference "venue", Venue
-  set "participants", Person
-  counter "votes"
+  attribute :name
+  reference :venue, Venue
+  set :participants, Person
+  counter :votes
 
-  index "name"
+  index :name
 end
 
 class Venue < Ohm::Model
-  attribute "name"
-  collection "events", Event, "venue_id"
+  attribute :name
+  collection :events, Event, :venue_id
 end
 
 class Person < Ohm::Model
-  attribute "name"
+  attribute :name
 end
 ```
 
@@ -218,7 +218,7 @@ For example:
 
 ```crystal
 class Log < Ohm::Model
-  track "text"
+  track :text
 
   def append(msg)
     key["text"].call("APPEND", msg)
@@ -239,9 +239,9 @@ log.append("world\n")
 assert_equal "world\n", log.tail(6)
 ```
 
-When the `log` object is deleted, the `"text"` key will be deleted
+When the `log` object is deleted, the `:text` key will be deleted
 too. Note that the key is scoped to that particular instance of
-`Log`, so if `log.id` is `42` then the key will be `Log:42"text"`.
+`Log`, so if `log.id` is `42` then the key will be `Log:42:text`.
 
 Persistence strategy
 --------------------
@@ -271,8 +271,8 @@ Given the following model declaration:
 
 ```crystal
 class Event < Ohm::Model
-  attribute "name"
-  set "attendees", Person
+  attribute :name
+  set :attendees, Person
 end
 ```
 
@@ -295,8 +295,8 @@ Given the following model declaration:
 
 ```crystal
 class Queue < Ohm::Model
-  attribute "name"
-  list "people", Person
+  attribute :name
+  list :people, Person
 end
 ```
 
@@ -319,8 +319,8 @@ Given the following model declaration:
 
 ```crystal
 class Site < Ohm::Model
-  attribute "url"
-  counter "visits"
+  attribute :url
+  counter :visits
 end
 ```
 
@@ -343,14 +343,14 @@ associations.
 
 ```crystal
 class Post < Ohm::Model
-  attribute "title"
-  attribute "body"
-  collection "comments", Comment, "post_id"
+  attribute :title
+  attribute :body
+  collection :comments, Comment, :post_id
 end
 
 class Comment < Ohm::Model
-  attribute "body"
-  reference "post", Post
+  attribute :body
+  reference :post, Post
 end
 ```
 
@@ -366,9 +366,9 @@ the following:
 ```crystal
 # Redefining our model above
 class Comment < Ohm::Model
-  attribute "body"
-  attribute "post_id"
-  index "post_id"
+  attribute :body
+  attribute :post_id
+  index :post_id
 
   def post=(post)
     self.post_id = post.id
@@ -395,36 +395,21 @@ just a macro that defines a finder for you, and we know that to find a model
 by a field requires an `Ohm::Model.index` to be defined for the field
 you want to search.
 
-```crystal
-# Redefining our post above
-class Post < Ohm::Model
-  attribute "title"
-  attribute "body"
+Here's again the `collection` macro in use:
 
-  def comments
-    Comment.find({ "post_id" => self.id })
-  end
+```crystal
+collection :comments, Comment, :post_id
+```
+
+When it expands, what you get is this method definition:
+
+```crystal
+def comments
+  Comment.find({ "post_id" => self.id })
 end
 ```
 
-The only "magic" happening is with the inference of the `index` that was used
-in the other model. The following all produce the same effect:
-
-```crystal
-# easiest, with the basic assumption that the index is `"post_id"`
-collection "comments", Comment
-
-# we can explicitly declare this as follows too:
-collection "comments", Comment, "post"
-
-# finally, we can use the default argument for the third parameter which
-# is `to_reference`.
-collection "comments", Comment, to_reference
-
-# exploring `to_reference` reveals a very interesting and simple concept:
-Post.to_reference == "post"
-# => true
-```
+Both examples are equivalent.
 
 Indices
 -------
@@ -483,8 +468,8 @@ entry. The canonical example of course would be the email of your user, e.g.
 
 ```crystal
 class User < Ohm::Model
-  attribute "email"
-  unique "email"
+  attribute :email
+  unique :email
 end
 
 u = User.create({ "email" => "foo@bar.com" })

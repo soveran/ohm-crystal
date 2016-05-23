@@ -189,14 +189,14 @@ module Ohm
     getter :attributes
 
     macro attribute(name)
-      attributes.add({{name}})
+      attributes.add({{name.id.stringify}})
 
       def {{name.id}}
-        attributes[{{name}}]?
+        attributes[{{name.id.stringify}}]?
       end
 
       def {{name.id}}=(value)
-        attributes[{{name}}] = value.to_s
+        attributes[{{name.id.stringify}}] = value.to_s
       end
     end
 
@@ -206,13 +206,13 @@ module Ohm
 
     macro counter(name)
       def {{name.id}}(n = "0")
-        counters.call("HINCRBY", {{name}}, n.to_s)
+        counters.call("HINCRBY", {{name.id.stringify}}, n.to_s)
       end
     end
 
     macro reference(name, model)
-      attribute "#{ {{name}} }_id"
-      index     "#{ {{name}} }_id"
+      attribute :{{name.id}}_id
+      index     :{{name.id}}_id
 
       def {{name.id}}=(instance)
         self.{{name.id}}_id = instance.id
@@ -225,7 +225,7 @@ module Ohm
 
     macro collection(name, model, reference)
       def {{name.id}}
-        {{model.id}}.find({ {{reference}} => id as String })
+        {{model.id}}.find({ {{reference.id.stringify}} => id as String })
       end
     end
 
@@ -302,26 +302,26 @@ module Ohm
 
     macro set(name, model)
       def {{name.id}}
-        @{{name.id}} ||= MutableSet.new({{model.id}}, key[{{name}}])
+        @{{name.id}} ||= MutableSet.new({{model.id}}, key[{{name.id.stringify}}])
       end
     end
 
     macro list(name, model)
       def {{name.id}}
-        @{{name.id}} ||= MutableList.new({{model.id}}, key[{{name}}])
+        @{{name.id}} ||= MutableList.new({{model.id}}, key[{{name.id.stringify}}])
       end
     end
 
-    def self.index(name)
-      indices.add(name)
+    macro index(name)
+      indices.add({{name.id.stringify}})
     end
 
-    def self.unique(name)
-      uniques.add(name)
+    macro unique(name)
+      uniques.add({{name.id.stringify}})
     end
 
-    def self.track(name)
-      tracked.add(name)
+    macro track(name)
+      tracked.add({{name.id.stringify}})
     end
 
     def self.as_index(name : String, value : String)
