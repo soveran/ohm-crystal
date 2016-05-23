@@ -103,7 +103,7 @@ the example below:
 ### Example
 
 ```crystal
-class Event < Ohm::Model
+class Party < Ohm::Model
   attribute :name
   reference :venue, Venue
   set :participants, Person
@@ -114,7 +114,7 @@ end
 
 class Venue < Ohm::Model
   attribute :name
-  collection :events, Event, :venue_id
+  collection :parties, Party, :venue_id
 end
 
 class Person < Ohm::Model
@@ -127,26 +127,26 @@ All models have the `id` attribute built in, you don't need to declare it.
 This is how you interact with IDs:
 
 ```crystal
-event = Event.create "name" => "Ohm Worldwide Conference 2031"
-event.id
+party = Party.create({"name": "Ohm Worldwide Party 2031"})
+party.id
 # => "1"
 
-# Find an event by id
-event == Event[1]
+# Find an party by id
+party == Party[1]
 # => true
 
-# Update an event
-event.update "name" => "Ohm Worldwide Conference 2032"
-event.name
-# => "Ohm Worldwide Conference"
+# Update an party
+party.update({"name": "Ohm Worldwide Party 2032"})
+party.name
+# => "Ohm Worldwide Party 2032"
 
-# Trying to find a non existent event
-Event[2]
+# Trying to find a non existent party
+Party[2]
 # => nil
 
-# Finding all the events
-Event.all.to_a
-# => [<Event::0x102736570 name='Ohm Worldwide Conference 2032'>]
+# Finding all the parties
+Party.all.to_a
+# => [<Party::0x102736570 name='Ohm Worldwide Conference 2032'>]
 ```
 
 This example shows some basic features, like attribute declarations
@@ -170,7 +170,7 @@ and 2 meta types:
 ### attribute
 
 An `attribute` is just any value that can be stored as a string.
-In the example above, we used this field to store the event's `name`.
+In the example above, we used this field to store the party's `name`.
 If you want to store any other data type, you have to convert it
 to a string first. Be aware that Redis will return a string when
 you retrieve the value.
@@ -259,8 +259,8 @@ For most use cases, this pattern doesn't represent a problem.
 If you are saving the object, this will suffice:
 
 ```crystal
-if event.save
-  event.comments.add(Comment.create({ "body" => "Wonderful event!" }))
+if party.save
+  party.comments.add(Comment.create({ "body" => "Wonderful party!" }))
 end
 ```
 
@@ -270,7 +270,7 @@ Working with Sets
 Given the following model declaration:
 
 ```crystal
-class Event < Ohm::Model
+class Party < Ohm::Model
   attribute :name
   set :attendees, Person
 end
@@ -280,10 +280,10 @@ You can add instances of `Person` to the set of attendees with the
 `add` method:
 
 ```crystal
-event.attendees.add(Person.create({ { "name" => "Albert" }))
+party.attendees.add(Person.create({ { "name" => "Albert" }))
 
 # And now...
-event.attendees.each do |person|
+party.attendees.each do |person|
   # ...do what you want with this person.
 end
 ```
@@ -418,8 +418,8 @@ An `Ohm::Model.index` is a set that's handled automatically by Ohm. For
 any index declared, Ohm maintains different sets of objects IDs for quick
 lookups.
 
-In the `Event` example, the index on the name attribute will
-allow for searches like `Event.find({ "name" => "some value" })`.
+In the `Party` example, the index on the name attribute will
+allow for searches like `Party.find({ "name" => "some value" })`.
 
 Note that the methods `Ohm::Model::Set#find` and
 `Ohm::Model::Set#except` need a corresponding index in order to work.
