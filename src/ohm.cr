@@ -449,24 +449,17 @@ module Ohm
       atts = Array(String).new
 
       model.attributes.each do |att|
-        val = attributes[att]?
+        next unless val = attributes[att]?
 
-        if val
-          atts.push(att)
-          atts.push(val)
+        if model.indices.includes?(att)
+          indices[att] = [val]
         end
-      end
 
-      model.indices.each do |att|
-        if attributes[att]?
-          indices[att] = [attributes[att]]
+        if model.uniques.includes?(att)
+          uniques[att] = val
         end
-      end
 
-      model.uniques.each do |att|
-        if attributes[att]?
-          uniques[att] = attributes[att]
-        end
+        atts.push(att, val)
       end
 
       features = { "name" => model.name }
