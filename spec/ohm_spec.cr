@@ -30,23 +30,23 @@ describe "Ohm" do
 
     reference :foo, Foo
 
-    set  :xs, Bar
+    set :xs, Bar
     list :ys, Bar
   end
 
   it "should have a key" do
-    assert_equal "Foo",   Foo.key.to_s
+    assert_equal "Foo", Foo.key.to_s
     assert_equal "Foo:1", Foo.key[1].to_s
   end
 
   it "should define attributes, indices and uniques" do
     assert_equal Set{"a", "b", "c", "d"}, Foo.attributes
-    assert_equal Set{"a", "b"},           Foo.indices
-    assert_equal Set{"d"},                Foo.uniques
+    assert_equal Set{"a", "b"}, Foo.indices
+    assert_equal Set{"d"}, Foo.uniques
   end
 
   it "should accept a hash with attributes" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.new(atts)
 
@@ -59,7 +59,7 @@ describe "Ohm" do
   end
 
   it "should provide setters" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.new(atts)
     foo.a = "2"
@@ -68,7 +68,7 @@ describe "Ohm" do
   end
 
   it "should have a nil id when new" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.new(atts)
 
@@ -76,7 +76,7 @@ describe "Ohm" do
   end
 
   it "should raise when trying to use #key when new" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.new(atts)
 
@@ -86,17 +86,17 @@ describe "Ohm" do
   end
 
   it "should persist the attributes when saved" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.new(atts)
 
     foo.save
 
-    assert_equal "1",     foo.id
+    assert_equal "1", foo.id
     assert_equal "Foo:1", foo.key.to_s
-    assert_equal "hash",  foo.key.call("TYPE")
+    assert_equal "hash", foo.key.call("TYPE")
 
-    foo2 = Foo[foo.id as String]
+    foo2 = Foo[foo.id.as(String)]
 
     assert_equal foo.key.to_s, foo2.key.to_s
     assert_equal foo, foo2
@@ -110,7 +110,7 @@ describe "Ohm" do
   end
 
   it "should create a new instance" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.create(atts)
 
@@ -118,7 +118,7 @@ describe "Ohm" do
   end
 
   it "should have a set of all ids" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.create(atts)
 
@@ -126,7 +126,7 @@ describe "Ohm" do
   end
 
   it "should find instances by indexed attributes" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.create(atts)
 
@@ -136,12 +136,12 @@ describe "Ohm" do
       Foo[2]
     end
 
-    finder = Foo.find({ "a" => "1", "b" => "2" })
+    finder = Foo.find({"a" => "1", "b" => "2"})
 
     assert_equal false, finder.includes?(nil)
     assert_equal false, finder.includes?(2)
-    assert_equal true,  finder.includes?(foo.id)
-    assert_equal true,  finder.includes?(foo)
+    assert_equal true, finder.includes?(foo.id)
+    assert_equal true, finder.includes?(foo)
 
     assert_equal 1, finder.size
 
@@ -151,32 +151,32 @@ describe "Ohm" do
   end
 
   it "should raise if trying to search an unindexed attribute" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.create(atts)
 
     assert_raise(Ohm::IndexNotFound) do
-      Foo.find({ "c" => "3" })
+      Foo.find({"c" => "3"})
     end
   end
 
   it "should chain finders" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.create(atts)
 
-    finder = Foo.find({ "a" => "1" }).find({ "b" => "2" })
+    finder = Foo.find({"a" => "1"}).find({"b" => "2"})
     assert_equal ["1"], finder.to_a.map(&.id)
 
-    finder = Foo.find({ "a" => "1" }).except({ "b" => "2" })
-    assert_equal true,  finder.to_a.map(&.id).empty?
+    finder = Foo.find({"a" => "1"}).except({"b" => "2"})
+    assert_equal true, finder.to_a.map(&.id).empty?
 
-    finder = Foo.find({ "a" => "1" }).combine({ "b" => "2" })
+    finder = Foo.find({"a" => "1"}).combine({"b" => "2"})
     assert_equal false, finder.to_a.map(&.id).empty?
   end
 
   it "should search by unique" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.create(atts)
 
@@ -190,7 +190,7 @@ describe "Ohm" do
   end
 
   it "should raise if trying to save a duplicate unique attribute" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.create(atts)
 
@@ -200,10 +200,10 @@ describe "Ohm" do
   end
 
   it "should allow references and collections" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.create(atts)
-    bar = Bar.create({ "a" => "1" })
+    bar = Bar.create({"a" => "1"})
 
     bar.foo = foo
     bar.save
@@ -222,9 +222,9 @@ describe "Ohm" do
   end
 
   it "should allow sets" do
-    bar1 = Bar.create({ "a" => "1" })
-    bar2 = Bar.create({ "a" => "2" })
-    bar3 = Bar.create({ "a" => "3" })
+    bar1 = Bar.create({"a" => "1"})
+    bar2 = Bar.create({"a" => "2"})
+    bar3 = Bar.create({"a" => "3"})
 
     bar1.xs.add(bar2)
 
@@ -236,9 +236,9 @@ describe "Ohm" do
   end
 
   it "should allow lists" do
-    bar1 = Bar.create({ "a" => "1" })
-    bar2 = Bar.create({ "a" => "2" })
-    bar3 = Bar.create({ "a" => "3" })
+    bar1 = Bar.create({"a" => "1"})
+    bar2 = Bar.create({"a" => "2"})
+    bar3 = Bar.create({"a" => "3"})
 
     bar1.ys.push(bar2)
 
@@ -250,9 +250,9 @@ describe "Ohm" do
   end
 
   it "should delete lists" do
-    bar1 = Bar.create({ "a" => "1" })
-    bar2 = Bar.create({ "a" => "2" })
-    bar3 = Bar.create({ "a" => "3" })
+    bar1 = Bar.create({"a" => "1"})
+    bar2 = Bar.create({"a" => "2"})
+    bar3 = Bar.create({"a" => "3"})
 
     bar1.ys.push(bar2)
 
@@ -264,7 +264,7 @@ describe "Ohm" do
   end
 
   it "should update an instance" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.create(atts)
 
@@ -272,14 +272,14 @@ describe "Ohm" do
     assert_equal "1", foo.a
 
     # Extra attributes, like "g", are ignored
-    foo.update({ "a" => "2", "g" => "5" })
+    foo.update({"a" => "2", "g" => "5"})
 
     assert_equal "2", foo.a
     assert_equal "2", Foo[1].a
   end
 
   it "should delete an instance" do
-    atts = { "a" => "1", "b" => "2", "c" => "3", "d" => "4" }
+    atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
     foo = Foo.create(atts)
 
@@ -333,7 +333,6 @@ describe "Ohm" do
   end
 end
 
-
 describe "Finder" do
   class Baz < Ohm::Model
     attribute :a
@@ -344,17 +343,17 @@ describe "Finder" do
   end
 
   it "should be combinable" do
-    u1 = Baz.create({ "a" => "1", "b" => "1" })
-    u2 = Baz.create({ "a" => "1", "b" => "2" })
-    u3 = Baz.create({ "a" => "2", "b" => "1" })
-    u4 = Baz.create({ "a" => "2", "b" => "2" })
+    u1 = Baz.create({"a" => "1", "b" => "1"})
+    u2 = Baz.create({"a" => "1", "b" => "2"})
+    u3 = Baz.create({"a" => "2", "b" => "1"})
+    u4 = Baz.create({"a" => "2", "b" => "2"})
 
-    f1 = Baz.find({ "a" => "1" })
-    f2 = Baz.find({ "a" => "1", "b" => "1" })
-    f3 = Baz.find({ "b" => "1" }).combine({ "a" => ["1", "2"] })
-    f4 = Baz.find({ "a" => "1" }).except({ "b" => "2" })
-    f5 = Baz.find({ "a" => "1" }).union({ "a" => "2" })
-    f6 = Baz.find({ "a" => "1" }).union({ "b" => "2" })
+    f1 = Baz.find({"a" => "1"})
+    f2 = Baz.find({"a" => "1", "b" => "1"})
+    f3 = Baz.find({"b" => "1"}).combine({"a" => ["1", "2"]})
+    f4 = Baz.find({"a" => "1"}).except({"b" => "2"})
+    f5 = Baz.find({"a" => "1"}).union({"a" => "2"})
+    f6 = Baz.find({"a" => "1"}).union({"b" => "2"})
 
     assert_equal f1.ids, ["1", "2"]
     assert_equal f2.ids, ["1"]

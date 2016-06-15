@@ -93,7 +93,7 @@ module Ohm
     end
 
     def ids
-      solve(expr) as Array(Resp::Reply)
+      solve(expr).as(Array(Resp::Reply))
     end
 
     def model
@@ -234,7 +234,7 @@ module Ohm
       getter :key
 
       @model : Ohm::Model.class
-      @key   : Nest
+      @key : Nest
 
       def initialize(@model, @key)
       end
@@ -270,7 +270,7 @@ module Ohm
       end
 
       def ids
-        key.call("SMEMBERS") as Array(Resp::Reply)
+        key.call("SMEMBERS").as(Array(Resp::Reply))
       end
     end
 
@@ -292,7 +292,7 @@ module Ohm
       end
 
       def ids
-        key.call("LRANGE", "0", "-1") as Array(Resp::Reply)
+        key.call("LRANGE", "0", "-1").as(Array(Resp::Reply))
       end
 
       def includes?(object)
@@ -354,7 +354,7 @@ module Ohm
       end
 
       id = redis.call("HGET", key["uniques"][name].to_s, value)
-      new(id as String).retrieve! if id
+      new(id.as(String)).retrieve! if id
     end
 
     def self.all
@@ -391,7 +391,7 @@ module Ohm
       end
 
       redis.commit.map_with_index do |atts, i|
-        new(ids[i].to_s).merge(atts as Array(Resp::Reply))
+        new(ids[i].to_s).merge(atts.as(Array(Resp::Reply)))
       end
     end
 
@@ -431,7 +431,7 @@ module Ohm
     end
 
     def retrieve!
-      merge(redis.call(["HGETALL", key.to_s]) as Array(Resp::Reply))
+      merge(redis.call(["HGETALL", key.to_s]).as(Array(Resp::Reply)))
     end
 
     def model
@@ -462,7 +462,7 @@ module Ohm
         atts.push(att, val)
       end
 
-      features = { "name" => model.name }
+      features = {"name" => model.name}
       features["id"] = id.to_s if id
 
       @id = script(:save, "0",
@@ -501,7 +501,7 @@ module Ohm
     end
 
     def merge(atts : Array(Resp::Reply))
-      atts.each_slice(2) do |slice, bar|
+      atts.each_slice(2) do |slice|
         @attributes[slice[0].to_s] = slice[1].to_s
       end
 
