@@ -137,12 +137,10 @@ module Ohm
     @id : String?
     @counters : Nest?
 
-    macro inherited
-      @@attributes = Set(String).new
-      @@indices = Set(String).new
-      @@uniques = Set(String).new
-      @@tracked = Set(String).new
-    end
+    @@attributes = Set(String).new
+    @@indices = Set(String).new
+    @@uniques = Set(String).new
+    @@tracked = Set(String).new
 
     macro with_file(filename, command)
       {% dir = system("dirname", __FILE__).strip %}
