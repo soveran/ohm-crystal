@@ -363,3 +363,38 @@ describe "Finder" do
     assert_equal f6.ids, ["1", "2", "4"]
   end
 end
+
+describe "Collections" do
+  before do
+    Ohm.redis = Resp.new("redis://localhost:6379")
+    Ohm.redis.call("FLUSHDB")
+    Ohm.redis.call("SCRIPT", "FLUSH")
+  end
+
+  class Team < Ohm::Model
+    attribute :name
+    collection :members, User, :team_id
+  end
+
+  class User < Ohm::Model
+    attribute :name
+    reference :team, Team
+  end
+
+  a = Team.create({"name" => "A"})
+  b = Team.create({"name" => "B"})
+
+  User.create({"name" => "foo", "team_id" => a.id.as(String)})
+  User.create({"name" => "bar", "team_id" => b.id.as(String)})
+
+  teams = Team.all.to_a
+
+  assert_equal a, teams[0]
+  assert_equal b, teams[1]
+
+  assert_equal "A", a.name
+  assert_equal "B", b.name
+
+  assert_equal "foo", a.members.to_a[0].name
+  assert_equal "bar", b.members.to_a[0].name
+end

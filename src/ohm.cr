@@ -42,14 +42,13 @@ module Ohm
 
   alias Filter = Hash(String, String | Array(String))
 
-  class Finder(T)
-    getter :key
-    getter :expr
-    getter :indices
+  class Finder(M, T)
+    getter model : M
+    getter key : Nest
+    getter expr : T
+    getter indices : Set(String)
 
-    @model : Ohm::Model.class
-
-    def initialize(@model, @key : Nest, @indices : Set(String), @expr : T)
+    def initialize(@model, @key, @indices, @expr)
     end
 
     def as_index(name : String, value : String)
@@ -105,23 +104,23 @@ module Ohm
     end
 
     def find(filter : Filter)
-      Finder.new(@model, key, indices,
-        ["SINTER", expr].concat(express(filter)))
+      expr = ["SINTER", expr].concat(express(filter))
+      Finder(M, typeof(expr)).new(model, key, indices, expr)
     end
 
     def union(filter : Filter)
-      Finder.new(@model, key, indices,
-        ["SUNION", expr, ["SINTER"].concat(express(filter))])
+      expr = ["SUNION", expr, ["SINTER"].concat(express(filter))]
+      Finder(M, typeof(expr)).new(model, key, indices, expr)
     end
 
     def except(filter : Filter)
-      Finder.new(@model, key, indices,
-        ["SDIFF", expr, ["SUNION"].concat(express(filter))])
+      expr = ["SDIFF", expr, ["SUNION"].concat(express(filter))]
+      Finder(M, typeof(expr)).new(model, key, indices, expr)
     end
 
     def combine(filter : Filter)
-      Finder.new(@model, key, indices,
-        ["SINTER", expr, ["SUNION"].concat(express(filter))])
+      expr = ["SINTER", expr, ["SUNION"].concat(express(filter))]
+      Finder(M, typeof(expr)).new(model, key, indices, expr)
     end
 
     private def solve(expr : Array)
@@ -134,9 +133,11 @@ module Ohm
   end
 
   abstract class Model
-    @id : String?
-    @counters : Nest?
+    getter id : String?
+    getter attributes : Hash(String, String)
 
+    @counters : Nest?
+    @attributes = Hash(String, String).new
     @@attributes = Set(String).new
     @@indices = Set(String).new
     @@uniques = Set(String).new
@@ -183,9 +184,6 @@ module Ohm
       @@tracked
     end
 
-    getter :id
-    getter :attributes
-
     macro attribute(name)
       attributes.add({{name.id.stringify}})
 
@@ -227,12 +225,9 @@ module Ohm
       end
     end
 
-    abstract class MutableCollection
-      getter :model
-      getter :key
-
-      @model : Ohm::Model.class
-      @key : Nest
+    abstract class MutableCollection(M)
+      getter model : M
+      getter key : Nest
 
       def initialize(@model, @key)
       end
@@ -250,7 +245,7 @@ module Ohm
       end
     end
 
-    class MutableSet < MutableCollection
+    class MutableSet(M) < MutableCollection(M)
       def size
         key.call("SCARD")
       end
@@ -272,7 +267,7 @@ module Ohm
       end
     end
 
-    class MutableList < MutableCollection
+    class MutableList(M) < MutableCollection(M)
       def size
         key.call("LLEN")
       end
@@ -298,16 +293,19 @@ module Ohm
       end
     end
 
-    macro set(name, model)
+    macro mutable(name, model, type)
       def {{name.id}}
-        @{{name.id}} ||= MutableSet.new({{model.id}}, key[{{name.id.stringify}}])
+        @{{name.id}} ||= {{type.id}}({{model.id}}.class).new(
+          {{model.id}}, key[{{name.id.stringify}}])
       end
     end
 
+    macro set(name, model)
+      mutable({{name}}, {{model}}, MutableSet)
+    end
+
     macro list(name, model)
-      def {{name.id}}
-        @{{name.id}} ||= MutableList.new({{model.id}}, key[{{name.id.stringify}}])
-      end
+      mutable({{name}}, {{model}}, MutableList)
     end
 
     macro index(name)
@@ -343,7 +341,8 @@ module Ohm
     end
 
     def self.find(filter : Hash(String, String | Array(String)))
-      Finder.new(self, key, indices, ["SINTER"].concat(as_indices(filter)))
+      expr = ["SINTER"].concat(as_indices(filter))
+      Finder(self.class, typeof(expr)).new(self, key, indices, expr)
     end
 
     def self.with(name, value)
@@ -356,7 +355,7 @@ module Ohm
     end
 
     def self.all
-      Finder.new(self, key, indices, key["all"].to_s)
+      Finder(self.class, String).new(self, key, indices, key["all"].to_s)
     end
 
     def self.includes?(id : String)
@@ -402,17 +401,21 @@ module Ohm
     end
 
     def initialize
-      @attributes = Hash(String, String).new
     end
 
     def initialize(atts : Hash(String, String))
-      @attributes = Hash(String, String).new
-
       merge(atts)
     end
 
     private def initialize(@id : String)
-      @attributes = Hash(String, String).new
+    end
+
+    def model
+      self.class
+    end
+
+    def redis
+      model.redis
     end
 
     def key
@@ -430,14 +433,6 @@ module Ohm
 
     def retrieve!
       merge(redis.call(["HGETALL", key.to_s]).as(Array(Resp::Reply)))
-    end
-
-    def model
-      self.class
-    end
-
-    def redis
-      model.redis
     end
 
     def save
