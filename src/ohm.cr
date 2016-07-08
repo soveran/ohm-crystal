@@ -536,6 +536,6 @@ module Ohm
   end
 
   def self.redis
-    @@redis ||= Resp.new("localhost", 6379)
+    @@redis ||= Resp.new("redis://localhost:6379")
   end
 end
