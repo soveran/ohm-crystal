@@ -104,23 +104,23 @@ module Ohm
     end
 
     def find(filter : Filter)
-      expr = ["SINTER", expr].concat(express(filter))
-      Finder(M, typeof(expr)).new(model, key, indices, expr)
+      ex = ["SINTER", expr].concat(express(filter))
+      Finder(M, typeof(ex)).new(model, key, indices, ex)
     end
 
     def union(filter : Filter)
-      expr = ["SUNION", expr, ["SINTER"].concat(express(filter))]
-      Finder(M, typeof(expr)).new(model, key, indices, expr)
+      ex = ["SUNION", expr, ["SINTER"].concat(express(filter))]
+      Finder(M, typeof(ex)).new(model, key, indices, ex)
     end
 
     def except(filter : Filter)
-      expr = ["SDIFF", expr, ["SUNION"].concat(express(filter))]
-      Finder(M, typeof(expr)).new(model, key, indices, expr)
+      ex = ["SDIFF", expr, ["SUNION"].concat(express(filter))]
+      Finder(M, typeof(ex)).new(model, key, indices, ex)
     end
 
     def combine(filter : Filter)
-      expr = ["SINTER", expr, ["SUNION"].concat(express(filter))]
-      Finder(M, typeof(expr)).new(model, key, indices, expr)
+      ex = ["SINTER", expr, ["SUNION"].concat(express(filter))]
+      Finder(M, typeof(ex)).new(model, key, indices, ex)
     end
 
     private def solve(expr : Array)
@@ -221,7 +221,7 @@ module Ohm
 
     macro collection(name, model, reference)
       def {{name.id}}
-        {{model.id}}.find({ {{reference.id.stringify}} => id as String })
+        {{model.id}}.find({ {{reference.id.stringify}} => id.as String })
       end
     end
 
