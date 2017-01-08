@@ -260,7 +260,7 @@ If you are saving the object, this will suffice:
 
 ```crystal
 if party.save
-  party.comments.add(Comment.create({ "body" => "Wonderful party!" }))
+  party.comments.add(Comment.create({"body" => "Wonderful party!"}))
 end
 ```
 
@@ -280,7 +280,7 @@ You can add instances of `Person` to the set of attendees with the
 `add` method:
 
 ```crystal
-party.attendees.add(Person.create({ "name" => "Albert" }))
+party.attendees.add(Person.create({"name" => "Albert"}))
 
 # And now...
 party.attendees.each do |person|
@@ -304,7 +304,7 @@ You can add instances of `Person` to the list of people with the
 `push` method:
 
 ```crystal
-queue.people.push(Person.create({ "name" => "Albert" }))
+queue.people.push(Person.create({"name" => "Albert"}))
 
 # And now...
 queue.people.each do |person|
@@ -384,7 +384,7 @@ The net effect here is we can conveniently set and retrieve `Post` objects,
 and also search comments using the `post_id` index.
 
 ```crystal
-Comment.find({ "post_id" => "1" })
+Comment.find({"post_id" => "1"})
 ```
 
 ### Collections explained
@@ -405,7 +405,7 @@ When it expands, what you get is this method definition:
 
 ```crystal
 def comments
-  Comment.find({ "post_id" => self.id })
+  Comment.find({"post_id" => self.id })
 end
 ```
 
@@ -419,7 +419,7 @@ any index declared, Ohm maintains different sets of objects IDs for quick
 lookups.
 
 In the `Party` example, the index on the name attribute will
-allow for searches like `Party.find({ "name" => "some value" })`.
+allow for searches like `Party.find({"name" => "some value"})`.
 
 Note that the methods `Ohm::Model::Set#find` and
 `Ohm::Model::Set#except` need a corresponding index in order to work.
@@ -430,26 +430,26 @@ You can find a collection of records with the `find` method:
 
 ```crystal
 # This returns a collection of users with the username "Albert"
-User.find({ "username" => "Albert" })
+User.find({"username" => "Albert"})
 ```
 
 ### Filtering results
 
 ```crystal
 # Find all users from Argentina
-User.find({ "country" => "Argentina" })
+User.find({"country" => "Argentina"})
 
 # Find all active users from Argentina
-User.find({ "country" => "Argentina", "status" => "active" })
+User.find({"country" => "Argentina", "status" => "active"})
 
 # Find all active users from Argentina and Uruguay
-User.find({ "status" => "active" }).combine({ "country" => ["Argentina", "Uruguay"] })
+User.find({"status" => "active"}).combine({"country" => ["Argentina", "Uruguay"] })
 
 # Find all users from Argentina, except those with a suspended account.
-User.find({ "country" => "Argentina" }).except({ "status" => "suspended" })
+User.find({"country" => "Argentina"}).except({"status" => "suspended"})
 
 # Find all users both from Argentina and Uruguay
-User.find({ "country" => "Argentina" }).union({ "country" => "Uruguay" })
+User.find({"country" => "Argentina"}).union({"country" => "Uruguay"})
 ```
 
 Note that calling these methods results in new sets being created
@@ -472,11 +472,11 @@ class User < Ohm::Model
   unique :email
 end
 
-u = User.create({ "email" => "foo@bar.com" })
+u = User.create({"email" => "foo@bar.com"})
 u == User.with("email", "foo@bar.com")
 # => true
 
-User.create({ "email" => "foo@bar.com" })
+User.create({"email" => "foo@bar.com"})
 # => raises Ohm::UniqueIndexViolation
 ```
 
