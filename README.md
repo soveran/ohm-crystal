@@ -127,7 +127,7 @@ All models have the `id` attribute built in, you don't need to declare it.
 This is how you interact with IDs:
 
 ```crystal
-party = Party.create({"name": "Ohm Worldwide Party 2031"})
+party = Party.create({"name" => "Ohm Worldwide Party 2031"})
 party.id
 # => "1"
 
@@ -136,7 +136,7 @@ party == Party[1]
 # => true
 
 # Update an party
-party.update({"name": "Ohm Worldwide Party 2032"})
+party.update({"name" => "Ohm Worldwide Party 2032"})
 party.name
 # => "Ohm Worldwide Party 2032"
 
@@ -280,7 +280,7 @@ You can add instances of `Person` to the set of attendees with the
 `add` method:
 
 ```crystal
-party.attendees.add(Person.create({ { "name" => "Albert" }))
+party.attendees.add(Person.create({ "name" => "Albert" }))
 
 # And now...
 party.attendees.each do |person|
@@ -304,7 +304,7 @@ You can add instances of `Person` to the list of people with the
 `push` method:
 
 ```crystal
-queue.people.push(Person.create({ { "name" => "Albert" }))
+queue.people.push(Person.create({ "name" => "Albert" }))
 
 # And now...
 queue.people.each do |person|
@@ -440,16 +440,16 @@ User.find({ "username" => "Albert" })
 User.find({ "country" => "Argentina" })
 
 # Find all active users from Argentina
-User.find({ "country" => "Argentina", { "status" => "active" })
+User.find({ "country" => "Argentina", "status" => "active" })
 
 # Find all active users from Argentina and Uruguay
 User.find({ "status" => "active" }).combine({ "country" => ["Argentina", "Uruguay"] })
 
 # Find all users from Argentina, except those with a suspended account.
-User.find({ "country" => "Argentina").except({ "status" => "suspended" })
+User.find({ "country" => "Argentina" }).except({ "status" => "suspended" })
 
 # Find all users both from Argentina and Uruguay
-User.find({ "country" => "Argentina").union({ "country" => "Uruguay" })
+User.find({ "country" => "Argentina" }).union({ "country" => "Uruguay" })
 ```
 
 Note that calling these methods results in new sets being created
