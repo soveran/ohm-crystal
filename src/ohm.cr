@@ -21,6 +21,7 @@
 require "nest"
 require "stal"
 require "json"
+require "weak_ref"
 
 module Ohm
   class MissingID < Exception
@@ -38,6 +39,27 @@ module Ohm
 
   class NoScript < Exception
     PATTERN = /NOSCRIPT/
+  end
+
+  class WeakPool(T)
+    def initialize(&block : -> T)
+      @pool = Hash(UInt64, WeakRef(T)).new do |h, k|
+        h[k] = WeakRef.new(block.call)
+      end
+    end
+
+    def id
+      Fiber.current.object_id
+    end
+
+    def compact!
+      @pool.delete_if { |k, v| @pool[k].target.nil? }
+    end
+
+    def current
+      compact! if @pool[id].target.nil?
+      @pool[id].target.not_nil!
+    end
   end
 
   alias Filter = Hash(String, String | Array(String))
@@ -532,10 +554,21 @@ module Ohm
     end
   end
 
-  def self.redis=(@@redis : Resp)
+  @@pool = WeakPool(Resp).new do
+    Resp.new("redis://localhost:6379")
+  end
+
+  def self.redis=(redis : Resp)
+    @@pool = WeakPool(Resp).new do
+      Resp.new(redis.url)
+    end
   end
 
   def self.redis
-    @@redis ||= Resp.new("redis://localhost:6379")
+    @@pool.current
+  end
+
+  def self.pool
+    @@pool
   end
 end
