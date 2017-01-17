@@ -146,7 +146,7 @@ Party[2]
 
 # Finding all the parties
 Party.all.to_a
-# => [<Party::0x102736570 name='Ohm Worldwide Conference 2032'>]
+# => [<Party::0x102736570 name='Ohm Worldwide Party 2032'>]
 ```
 
 This example shows some basic features, like attribute declarations
