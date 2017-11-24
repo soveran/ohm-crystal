@@ -213,6 +213,22 @@ module Ohm
         attributes[{{name.id.stringify}}]?
       end
 
+      attribute_setter({{name}})
+    end
+
+    macro attribute(name, cast)
+      attributes.add({{name.id.stringify}})
+
+      def {{name.id}}
+        value = attributes[{{name.id.stringify}}]?
+        return unless value
+        {{cast}}.call value
+      end
+
+      attribute_setter({{name}})
+    end
+
+    macro attribute_setter(name)
       def {{name.id}}=(value)
         attributes[{{name.id.stringify}}] = value.to_s
       end
@@ -427,6 +443,14 @@ module Ohm
 
     def initialize(atts : Hash(String, String))
       merge(atts)
+    end
+
+    def initialize(atts : Hash)
+      sanitized_atts = atts.reduce({} of String => String) do |h, (k, v)|
+        h[k.to_s] = v.to_s
+        h
+      end
+      merge(sanitized_atts)
     end
 
     private def initialize(@id : String)
