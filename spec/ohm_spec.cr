@@ -2,7 +2,7 @@ require "./spec_helper"
 
 describe "Ohm" do
   before do
-    Ohm.redis = Resp.new("redis://localhost:6379")
+    Ohm.redis = Resp.new("redis://#{REDIS_HOST}:#{REDIS_PORT}")
     Ohm.redis.call("FLUSHDB")
     Ohm.redis.call("SCRIPT", "FLUSH")
   end
@@ -366,7 +366,7 @@ end
 
 describe "Collections" do
   before do
-    Ohm.redis = Resp.new("redis://localhost:6379")
+    Ohm.redis = Resp.new("redis://#{REDIS_HOST}:#{REDIS_PORT}")
     Ohm.redis.call("FLUSHDB")
     Ohm.redis.call("SCRIPT", "FLUSH")
   end
