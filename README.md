@@ -3,6 +3,8 @@ Ohm ॐ
 
 Object-hash mapping library for Redis.
 
+![CI](https://github.com/soveran/ohm-crystal/workflows/Crystal%20CI/badge.svg)
+
 Description
 -----------
 
