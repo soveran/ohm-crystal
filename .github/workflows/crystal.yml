@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install dependencies
-      run: shards install
+      run: shards install --ignore-crystal-version
     - name: Run tests
       env:
         REDIS_HOST: redis
