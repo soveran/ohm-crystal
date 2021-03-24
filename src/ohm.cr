@@ -53,7 +53,7 @@ module Ohm
     end
 
     def compact!
-      @pool.delete_if { |k, v| @pool[k].value.nil? }
+      @pool.reject! { |k, v| @pool[k].value.nil? }
     end
 
     def current
