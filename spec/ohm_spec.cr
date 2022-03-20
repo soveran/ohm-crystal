@@ -12,6 +12,7 @@ describe "Ohm" do
     attribute :b
     attribute :c
     attribute :d
+    attribute :e, -> (val : String) { val.to_i }
 
     index :a
     index :b
@@ -40,7 +41,7 @@ describe "Ohm" do
   end
 
   it "should define attributes, indices and uniques" do
-    assert_equal Set{"a", "b", "c", "d"}, Foo.attributes
+    assert_equal Set{"a", "b", "c", "d", "e"}, Foo.attributes
     assert_equal Set{"a", "b"}, Foo.indices
     assert_equal Set{"d"}, Foo.uniques
   end
@@ -58,6 +59,20 @@ describe "Ohm" do
     assert_equal "4", foo.d
   end
 
+  it "should accept a hash with non-string attributes" do
+    atts           = {"a" => "1", "b" => 2, :c => "3", :d => 4}
+    sanitized_atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
+
+    foo = Foo.new(atts)
+
+    assert_equal sanitized_atts, foo.attributes
+
+    assert_equal "1", foo.a
+    assert_equal "2", foo.b
+    assert_equal "3", foo.c
+    assert_equal "4", foo.d
+  end
+
   it "should provide setters" do
     atts = {"a" => "1", "b" => "2", "c" => "3", "d" => "4"}
 
@@ -65,6 +80,14 @@ describe "Ohm" do
     foo.a = "2"
 
     assert_equal "2", foo.a
+  end
+
+  it "should cast an attribute if proc provided" do
+    atts = {"e" => "4"}
+
+    foo = Foo.new(atts)
+
+    assert_equal 4, foo.e
   end
 
   it "should have a nil id when new" do
